@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doktorlar</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<nav class="navbar">
+  <h1><a href="index.html" style="text-decoration: none; color: white;">Yönetim Sistemi</a></h1>
+</nav>
+<div class="container">
+  <h1>Doktorlar</h1>
+  <table id="doctor-table">
+    <thead>
+    <tr>
+      <th>Ad</th>
+      <th>Uzmanlık</th>
+      <th>E-posta</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Doktorlar buraya yüklenecek -->
+    </tbody>
+  </table>
+</div>
+<script>
+  async function fetchDoctors() {
+    try {
+      const response = await fetch('http://localhost:8080/api/doctors');
+      if (response.ok) {
+        const doctors = await response.json();
+        const tableBody = document.querySelector('#doctor-table tbody');
+        tableBody.innerHTML = '';
+
+        if (doctors.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="3">Hiç doktor bulunamadı.</td></tr>';
+        } else {
+          doctors.forEach(doctor => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                      <td>${doctor.name}</td>
+                      <td>${doctor.specialty}</td>
+                      <td>${doctor.email}</td>
+                    `;
+            tableBody.appendChild(row);
+          });
+        }
+      } else {
+        console.error('API hatası:', response.status);
+        alert('Doktorlar yüklenirken bir hata oluştu!');
+      }
+    } catch (error) {
+      console.error('Hata:', error);
+      alert('Sunucu bağlantısında bir sorun oluştu!');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', fetchDoctors);
+
+</script>
+</body>
+</html>

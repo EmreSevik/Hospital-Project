@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Randevular</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<nav class="navbar">
+  <h1><a href="index.html" style="text-decoration: none; color: white;">Yönetim Sistemi</a></h1>
+</nav>
+<div class="container">
+  <h1>Randevular</h1>
+  <form id="appointment-form">
+    <label for="patientName">Hasta Adı:</label>
+    <input type="text" id="patientName" required placeholder="Hasta adı giriniz">
+
+    <label for="doctorName">Doktor Adı:</label>
+    <select id="doctorName" required>
+      <!-- Doktorlar buraya yüklenecek -->
+    </select>
+
+    <label for="appointmentDate">Randevu Tarihi:</label>
+    <input type="datetime-local" id="appointmentDate" required>
+
+    <div id="error-message" style="color: red; display: none; margin-bottom: 10px;">Lütfen tüm alanları doğru şekilde doldurun.</div>
+
+    <button type="submit">Randevu Al</button>
+  </form>
+  <table id="appointment-table">
+    <thead>
+    <tr>
+      <th>Hasta</th>
+      <th>Doktor</th>
+      <th>Tarih</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Randevular buraya yüklenecek -->
+    </tbody>
+  </table>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', async function () {
+    try {
+      const response = await fetch('http://localhost:8080/api/doctors');
+      if (response.ok) {
+        const doctors = await response.json();
+        const doctorSelect = document.getElementById('doctorName');
+        doctors.forEach(doctor => {
+          const option = document.createElement('option');
+          option.value = doctor.name;
+          option.textContent = doctor.name;
+          doctorSelect.appendChild(option);
+        });
+      }
+    } catch (error) {
+      console.error('Hata:', error);
+      alert('Sunucu bağlantısında bir sorun oluştu!');
+    }
+  });
+
+  document.getElementById('appointment-form').addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    const patientName = document.getElementById('patientName').value;
+    const doctorName = document.getElementById('doctorName').value;
+    const appointmentDate = document.getElementById('appointmentDate').value;
+    const errorMessage = document.getElementById('error-message');
+
+    if (!patientName || !doctorName || !appointmentDate) {
+      errorMessage.style.display = 'block';
+      return;
+    } else {
+      errorMessage.style.display = 'none';
+    }
+
+    try {
+      const response = await fetch('http://localhost:8080/api/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ patientName, doctorName, appointmentDate })
+      });
+
+      if (response.ok) {
+        alert('Randevu başarıyla alındı!');
+        location.reload();
+      } else {
+        alert('Randevu alırken bir hata oluştu!');
+      }
+    } catch (error) {
+      console.error('Hata:', error);
+      alert('Sunucu bağlantısında bir sorun oluştu!');
+    }
+  });
+</script>
+</body>
+</html>
